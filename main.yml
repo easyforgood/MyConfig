@@ -1,0 +1,105 @@
+---
+- name: Upload test file
+  copy: src=./benchmark_sub dest=~/
+
+- name: Install nodejs
+  apt: name=nodejs update_cache=no
+  become: True
+  become_method: sudo
+  when: ansible_os_family == 'Debian' 
+
+- name: Install npm
+  apt: name=nodejs update_cache=no
+  become: True
+  become_method: sudo
+  when: ansible_os_family == 'Debian'
+
+- name: Install nodejs
+  synchronize: src=/home/siplexy/ansible/node-v4.5.0-linux-x64 dest=~/ mode=push  
+  when: ansible_os_family == 'RedHat'
+
+- name: Install nodejs env
+  command: echo "export PATH=$PATH:/home/siplexy/ansible/node-v4.5.0-linux-x64/bin >> /etc/profile"
+  become: True
+  become_method: sudo
+  when: ansible_os_family == 'RedHat'
+
+- name: Update nodejs env
+  command: source /etc/profile
+  become: True
+  become_method: sudo
+  when: ansible_os_family == 'RedHat'
+
+- name: Sysctl test
+  command: sysctl -w fs.file-max=2097152 
+  become: True
+  become_method: sudo
+
+- name: ulimit 
+  command: ulimit -n 50000
+
+- name: install pm2 
+  command: npm install -g pm2
+  become: True
+  become_method: sudo
+
+  #  name : template config.json 
+
+- name: start sub
+  command: pm2 start benchmark_sub/main.js -o ./benchmark_sub/out.log ./benchmark_sub/err.log
+
+- name: stop sub
+  command: pm2 stop benchmark_sub/
+
+#- name: Install Java 1.7
+#  yum: name=java-1.7.0-openjdk state=present
+#
+#- name: add group "tomcat"
+#  group: name=tomcat
+#
+#- name: add user "tomcat"
+#  user: name=tomcat group=tomcat home=/usr/share/tomcat createhome=no
+#  become: True
+#  become_method: sudo
+#
+#- name: Download Tomcat
+#  get_url: url=http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.61/bin/apache-tomcat-7.0.61.tar.gz dest=/opt/apache-tomcat-7.0.61.tar.gz
+#
+#- name: Extract archive
+#  command: chdir=/usr/share /bin/tar xvf /opt/apache-tomcat-7.0.61.tar.gz -C /opt/ creates=/opt/apache-tomcat-7.0.61
+#
+#- name: Symlink install directory
+#  file: src=/opt/apache-tomcat-7.0.61 path=/usr/share/tomcat state=link
+#
+#- name: Change ownership of Tomcat installation
+#  file: path=/usr/share/tomcat/ owner=tomcat group=tomcat state=directory recurse=yes
+#
+#- name: Configure Tomcat server
+#  template: src=server.xml dest=/usr/share/tomcat/conf/
+#  notify: restart tomcat
+#
+#- name: Configure Tomcat users
+#  template: src=tomcat-users.xml dest=/usr/share/tomcat/conf/
+#  notify: restart tomcat
+#
+#- name: Install Tomcat init script
+#  copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+#
+#- name: Start Tomcat
+#  service: name=tomcat state=started enabled=yes
+#
+#- name: deploy iptables rules
+#  template: src=iptables-save dest=/etc/sysconfig/iptables
+#  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6'"
+#  notify: restart iptables
+#
+#- name: insert firewalld rule for tomcat http port
+#  firewalld: port={{ http_port }}/tcp permanent=true state=enabled immediate=yes
+#  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+#
+#- name: insert firewalld rule for tomcat https port
+#  firewalld: port={{ https_port }}/tcp permanent=true state=enabled immediate=yes
+#  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+#
+#- name: wait for tomcat to start
+#  wait_for: port={{http_port}}
