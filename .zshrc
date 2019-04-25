@@ -1,11 +1,14 @@
-# Path to your oh-my-zsh installation.
-  export ZSH=/home/siplexy/.oh-my-zsh
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="robbyrussell"
+# Path to your oh-my-zsh installation.
+export ZSH=/Users/<TBD>/.oh-my-zsh
+BULLETTRAIN_PROMPT_CHAR="🐹 "
+
+# Set name of the theme to load. Optionally, if you set this to "random"
+# it'll load a random theme each time that oh-my-zsh is loaded.
+# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
+ZSH_THEME="ys"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -49,14 +52,14 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+# plugins=(wd git web-search thefuck d last-working-dir)
+plugins=(wd git d last-working-dir thefuck tmux)
+
+source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-# export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 # export MANPATH="/usr/local/man:$MANPATH"
-
-source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -72,7 +75,7 @@ source $ZSH/oh-my-zsh.sh
 # export ARCHFLAGS="-arch x86_64"
 
 # ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
+# export SSH_KEY_PATH="~/.ssh/rsa_id"
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
@@ -82,7 +85,74 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-. /usr/local/lib/python2.7/dist-packages/powerline/bindings/zsh/powerline.zsh
-alias cls="clear"
-alias ssstart="nohup sslocal -c ~/shadow.json >> /dev/null 2>&1 &"
-alias btreg="bitcoind -regtest -daemon -zmqpubhasttx=tcp://127.0.0.1:28843 -zmqpubhashblock=tcp://127.0.0.1:28843"
+
+alias ctags="`brew --prefix`/bin/ctags"
+# export GOROOT=/usr/local/go
+export GOROOT=/usr/local/go
+export GOPATH=/Users/<TBD>/Workplace/go
+export MAVEN_HOME=/Users/<TBD>/bin/apache-maven-3.5.2
+export PATH=$PATH:$MAVEN_HOME/bin
+export PATH=$PATH:/Users/<TBD>/Workplace/go/bin:/usr/local/node-v8.11.1-linux-x64/bin
+
+alias clc="clipcopy"
+
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home
+alias tailf="tail -f"
+export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin:/Users/<TBD>/bin/commandline:$GOROOT/bin
+
+alias vi="vim"
+
+#function main2(){
+#	if [ $(ps -ef | grep -c "tmux") -lt 1 ]
+#	then
+#		[ -z "$TMUX" ] && exec tmux new-session -s main
+#	fi
+#}
+#
+alias main="tmux a -t main || tmux new-session -s main"
+#alias pwd="pwd ; pwd|clc"
+function lb() {
+	if [ -e ~/logbook/logbook-`date +%Y-%m-%d`.md ]
+	then
+		open ~/logbook/logbook-`date +%Y-%m-%d`.md
+	else
+		python3 ~/bin/commandline/logbook.py & open ~/logbook/logbook-`date +%Y-%m-%d`.md
+	fi
+}
+#function prev() {
+#  PREV=$(fc -lrn | head -n 1)
+#    sh -c "pet new `printf %q "$PREV"`"
+#}
+
+set +H
+alias l10="ll -t | head -n 10"
+function rhist(){
+	cmd=$(history | sort -r | peco --layout=bottom-up| awk  '{$1="";print $0}')
+	echo "runnig command : $cmd "
+	eval $cmd
+}
+alias ida64="/Applications/IDA\ Pro\ 7.0/ida64.app/Contents/MacOS/ida64"
+function exists { which $1 &> /dev/null }
+
+if exists percol; then
+	function percol_select_history() {
+		local tac
+		exists gtac && tac="gtac" || { exists tac && tac="tac" || { tac="tail -r" } }
+		BUFFER=$(fc -l -n 1 | eval $tac | percol --query "$LBUFFER")
+		CURSOR=$#BUFFER         # move cursor
+		zle -R -c               # refresh
+	}
+
+zle -N percol_select_history
+bindkey '^R' percol_select_history
+fi
+
+export THEOS=~/theos
+
+# thanks for https://remysharp.com/2018/08/23/cli-improved?utm_source=wanqu.co&utm_campaign=Wanqu+Daily&utm_medium=website
+
+alias cat="bat"
+alias top="htop"
+alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
+alias help='tldr'
+
